@@ -1,0 +1,3 @@
+[submodule "socket.io-client"]
+	path = socket.io-client
+	url = git@github.com:bumpers-io/socket.io-client.git
