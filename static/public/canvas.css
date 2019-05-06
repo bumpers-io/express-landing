@@ -1,0 +1,6 @@
+canvas {
+  /* TODO: template dimensions with external file */
+  width: 800px;
+  height: 600px;
+  border: 5px solid black;
+}
