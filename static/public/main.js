@@ -1,64 +1,59 @@
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// Vars
+// TODO: fetch dimensions from css external file
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
 
-async function main_loop() {
-    const CANVAS_WIDTH = 800;
-    const CANVAS_HEIGHT = 600;
+const CHAR_RADIUS = 25;
 
-    const CHAR_RADIUS = 25;
+// temp allow player char to move; no centered camera
+var charPosX = (CANVAS_WIDTH/2) - (CHAR_RADIUS);
+var charPosY = (CANVAS_HEIGHT/2) - (CHAR_RADIUS);
 
-    var canvas = document.getElementById('canvas');
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
+// Init canvas
+var canvas = document.getElementById('canvas');
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
 
-    // Draw a 'player'
-    // should be a circle, not rectangle
-    var context = canvas.getContext('2d');
+var context = canvas.getContext('2d');
+
+// FPS management
+let canvasLastUTC;  // in milliseconds
+
+// WebSockets
+var socket = io();
+
+function gameLoop() {
+    // parse new game state if it exists
+    socket.on('message', (data) => {
+        console.log(data);
+    });
+
+    // render (relevant) objects to canvas
+    // clear canvas for redrawing
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the player char
+    // - should be a circle, not rectangle
     context.fillStyle = 'red';
     context.fillRect(
-        (CANVAS_WIDTH/2) - (CHAR_RADIUS),
-        (CANVAS_HEIGHT/2) - (CHAR_RADIUS),
+        charPosX,
+        charPosY,
         CHAR_RADIUS*2,
         CHAR_RADIUS*2
     );
 
-    /* Const for reference in calculations
-    *  - current desired framerate is ~30 fps
-    */  
-    const DESIRED_FPS = 30;
-    const FRAME_DELAY_MS = 1000/DESIRED_FPS;
-    var state_last_utc_ms;
-    var frame_delay_diff;
 
-    // FPS calculation
-    const fps_sample_num = 3;
+    canvasLastUTC=performance.now();
+    console.log("Canvas UTC: ", canvasLastUTC);
 
-    console.log("[INFO] Game loop starting");
-    while (true) {
-        // parse new game state if it exists
-
-        // render (relevant) objects to canvas
-
-        // TEMP: fake workload
-        //await sleep(Math.floor(Math.random()*FRAME_DELAY_MS)+(FRAME_DELAY_MS/2));
-
-
-        // if (state_last_utc_ms != null)
-        if (state_last_utc_ms) {
-            frame_delay_diff = FRAME_DELAY_MS-(Date.now()-state_last_utc_ms);
-            
-            if (frame_delay_diff > 0) {
-                console.log("[DEBUG] Pausing to maintain framerate");
-                await sleep(frame_delay_diff);
-            } else {
-                console.log("[WARN] Framerate warning: late by " + frame_delay_diff*(-1) + "ms");
-            }
-        }
-
-        state_last_utc_ms=Date.now();
-        console.log("Frame UTC: " + state_last_utc_ms);
-    }
+    // Only execute loop once animation
+    // frame is available
+    console.log("[DEBUG] Waiting for animation frame...");
+    window.requestAnimationFrame(() => {
+        console.log("[DEBUG] Animation frame received");
+        gameLoop();
+    });
 }
 
-main_loop();
+console.log("[INFO] Game loop starting");
+gameLoop();
