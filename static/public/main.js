@@ -9,7 +9,7 @@ const CHAR_RADIUS = 25;
 var charPosX = (CANVAS_WIDTH/2) - (CHAR_RADIUS);
 var charPosY = (CANVAS_HEIGHT/2) - (CHAR_RADIUS);
 
-// Init canvas
+// Canvas
 var canvas = document.getElementById('canvas');
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
@@ -17,7 +17,16 @@ canvas.height = CANVAS_HEIGHT;
 var context = canvas.getContext('2d');
 
 // FPS management
-let canvasLastUTC;  // in milliseconds
+var fpsDisplay = document.getElementById('fps_display');
+var fpsLastUTC = performance.now();
+var canvasNowUTC = fpsLastUTC;
+let canvasLastUTC;
+
+
+function getFPS() {
+    // naive FPS calculation
+    return Math.floor(1000/(canvasNowUTC - canvasLastUTC));
+}
 
 // WebSockets
 var socket = io();
@@ -42,15 +51,21 @@ function gameLoop() {
         CHAR_RADIUS*2
     );
 
+    // FPS management
+    canvasNowUTC=performance.now();
+    if ((canvasNowUTC - fpsLastUTC) >= 500) {
+        // update FPS display every 500ms
+        console.log('[DEBUG] Updating FPS display');
+        fpsDisplay.innerHTML = '' + getFPS() + ' fps';
+        fpsLastUTC = canvasNowUTC;
+    }
+    canvasLastUTC=canvasNowUTC;
 
-    canvasLastUTC=performance.now();
-    console.log("Canvas UTC: ", canvasLastUTC);
-
-    // Only execute loop once animation
-    // frame is available
-    console.log("[DEBUG] Waiting for animation frame...");
+    // Only execute loop once animation frame is available
+    // (web browser W3C standard is 60hz)
+    // console.log("[DEBUG] Waiting for animation frame...");
     window.requestAnimationFrame(() => {
-        console.log("[DEBUG] Animation frame received");
+        // console.log("[DEBUG] Animation frame received");
         gameLoop();
     });
 }
