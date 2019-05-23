@@ -1,20 +1,56 @@
 // Vars
 // TODO: fetch dimensions from css external file
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
 
+// Canvas
+var canvas = document.getElementById('canvas');
+const CANVAS_WIDTH = canvas.width-0;
+const CANVAS_HEIGHT = canvas.height-0;
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
+
+var context = canvas.getContext('2d');
+
+// Player Char setup
 const CHAR_RADIUS = 25;
 
 // temp allow player char to move; no centered camera
 var charPosX = (CANVAS_WIDTH/2) - (CHAR_RADIUS);
 var charPosY = (CANVAS_HEIGHT/2) - (CHAR_RADIUS);
 
-// Canvas
-var canvas = document.getElementById('canvas');
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
 
-var context = canvas.getContext('2d');
+// Box2D World
+var b2d =  Box2D()
+var world = new b2d.b2World(new b2d.b2Vec2(0, 0)); // no-gravity; top-down
+
+console.log(world);
+
+// Walls
+var fixDef = new b2d.b2FixtureDef;
+fixDef.density = .5;
+fixDef.friction = 0;
+fixDef.restitution = 0.4;
+
+var wallThickness = 25; // 25 px
+
+var horWallDef = new b2d.b2BodyDef;
+horWallDef.type = b2d.b2Body.b2_staticBody;
+fixDef.shape = new b2d.b2PolygonShape;
+fixDef.shape.SetAsBox(CANVAS_WIDTH/2, wallThickness);
+console.log(horWallDef);
+horWallDef.position.Set(CANVAS_WIDTH/2, 0);
+world.CreateBody(horWallDef).CreateFixture(fixDef);
+horWallDef.position.Set(CANVAS_WIDTH/2, CANVAS_HEIGHT-wallThickness);
+world.CreateBody(horWallDef).CreateFixture(fixDef);
+
+var vertWallDef = new b2d.b2BodyDef;
+vertWallDef.type = b2d.b2Body.b2_staticBody;
+fixDef.shape = new b2d.b2PolygonShape;
+fixDef.shape.SetAsBox(wallThickness, CANVAS_HEIGHT/2);
+vertWallDef.position.Set(0, CANVAS_HEIGHT/2);
+world.CreateBody(vertWallDef).CreateFixture(fixDef);
+vertWallDef.position.Set(CANVAS_WIDTH-wallThickness, CANVAS_HEIGHT/2);
+world.CreateBody(vertWallDef).CreateFixture(fixDef);
+
 
 // FPS management
 var fpsDisplay = document.getElementById('fps_display');

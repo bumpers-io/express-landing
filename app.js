@@ -26,6 +26,9 @@ app.get('/static/main.js', (req, res) => {
 app.get('/static/canvas.css', (req, res) => {
     res.sendFile(path.join(__dirname + '/static/public/canvas.css'));
 });
+app.get('/box2d.js', (req, res) => {
+    res.sendFile(path.join(__dirname + '/box2d.js/build/Box2D_v2.3.1_min.js'));
+});
 
 server.listen(appPort, () => {
     console.log('HTTP server listening on port ', appPort)
